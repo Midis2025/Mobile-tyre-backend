@@ -1,0 +1,54 @@
+{
+  "kind": "collectionType",
+  "collectionName": "appointments",
+  "info": {
+    "singularName": "appointment",
+    "pluralName": "appointments",
+    "displayName": "appointment"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "fullName": {
+      "type": "string"
+    },
+    "phoneNumber": {
+      "type": "string"
+    },
+    "serviceType": {
+      "type": "enumeration",
+      "enum": [
+        "Premium Tyre Service",
+        "Expert Mechanical Repair",
+        "Puncture Repair",
+        "Mobile Trailer Tyre Fitting",
+        "Precision Wheel Balancing",
+        "Emergency Tyre Fitting",
+        "Locking Wheel Nut Removal"
+      ]
+    },
+    "tyreSize": {
+      "type": "string"
+    },
+    "timingSlot": {
+      "type": "enumeration",
+      "enum": [
+        "As Soon As Possible",
+        "Morning (8AM - 12PM)",
+        "Afternoon (12PM - 4PM)",
+        "Evening (4PM - 8PM)"
+      ]
+    },
+    "bookingStatus": {
+      "type": "enumeration",
+      "enum": [
+        "Pending",
+        "Approved",
+        "Rejected",
+        "Completed"
+      ]
+    }
+  }
+}
