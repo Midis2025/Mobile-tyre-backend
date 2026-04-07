@@ -563,6 +563,41 @@ export interface ApiTyreTyre extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiVehicleSearchVehicleSearch
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'vehicle_searches';
+  info: {
+    displayName: 'vehicle-search';
+    pluralName: 'vehicle-searches';
+    singularName: 'vehicle-search';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    fuelType: Schema.Attribute.String;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::vehicle-search.vehicle-search'
+    > &
+      Schema.Attribute.Private;
+    model: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    registrationNumber: Schema.Attribute.String;
+    tyreDiameter: Schema.Attribute.Integer;
+    tyreHeight: Schema.Attribute.Integer;
+    tyreWidth: Schema.Attribute.Integer;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    year: Schema.Attribute.Integer;
+  };
+}
+
 export interface PluginContentReleasesRelease
   extends Struct.CollectionTypeSchema {
   collectionName: 'strapi_releases';
@@ -1077,6 +1112,7 @@ declare module '@strapi/strapi' {
       'api::appointment.appointment': ApiAppointmentAppointment;
       'api::contact-request.contact-request': ApiContactRequestContactRequest;
       'api::tyre.tyre': ApiTyreTyre;
+      'api::vehicle-search.vehicle-search': ApiVehicleSearchVehicleSearch;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
       'plugin::i18n.locale': PluginI18NLocale;

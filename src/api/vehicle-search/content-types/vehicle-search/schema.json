@@ -1,0 +1,36 @@
+{
+  "kind": "collectionType",
+  "collectionName": "vehicle_searches",
+  "info": {
+    "singularName": "vehicle-search",
+    "pluralName": "vehicle-searches",
+    "displayName": "vehicle-search"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "registrationNumber": {
+      "type": "string"
+    },
+    "model": {
+      "type": "string"
+    },
+    "year": {
+      "type": "integer"
+    },
+    "fuelType": {
+      "type": "string"
+    },
+    "tyreWidth": {
+      "type": "integer"
+    },
+    "tyreHeight": {
+      "type": "integer"
+    },
+    "tyreDiameter": {
+      "type": "integer"
+    }
+  }
+}
