@@ -1,0 +1,45 @@
+{
+  "kind": "collectionType",
+  "collectionName": "book_appointments",
+  "info": {
+    "singularName": "book-appointment",
+    "pluralName": "book-appointments",
+    "displayName": "book-appointment"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "fullName": {
+      "type": "string"
+    },
+    "phoneNumber": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "carModel": {
+      "type": "string"
+    },
+    "timingSlot": {
+      "type": "enumeration",
+      "enum": [
+        "Morning (8:00 AM to 12 PM)",
+        "Afternoon (12:00 PM to 4 PM",
+        "Evening (4:00 PM to 10 PM)"
+      ]
+    },
+    "bookingStatus": {
+      "type": "enumeration",
+      "enum": [
+        "Pending",
+        "Confirmed",
+        "In Progress",
+        "Completed",
+        "Cancelled"
+      ]
+    }
+  }
+}

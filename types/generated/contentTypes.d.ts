@@ -454,6 +454,43 @@ export interface ApiAppointmentAppointment extends Struct.CollectionTypeSchema {
       'api::appointment.appointment'
     > &
       Schema.Attribute.Private;
+    location: Schema.Attribute.Enumeration<
+      [
+        'Guildford',
+        'Woking',
+        'Farnham',
+        'Farnborough',
+        'Aldershot',
+        'Petersfield',
+        'Haslemere',
+        'Godalming',
+        'Cranleigh',
+        'Alton',
+        'Bagshot',
+        'Bordon',
+        'Fleet',
+        'Hindhead',
+        'Liphook',
+        'Lightwater',
+        'Liss',
+        'Midhurst',
+        'Petworth',
+        'Sandhurst',
+        'Virginia Water',
+        'Windlesham',
+        'Yateley',
+        'Ascot',
+        'Bracknell',
+        'Basingstoke',
+        'Southampton',
+        'Frimley',
+        'Tongham',
+        'Church Crookham',
+        'Ash',
+        'Ash Vale',
+        'Hankley Common',
+      ]
+    >;
     phoneNumber: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     serviceType: Schema.Attribute.Enumeration<
@@ -476,6 +513,48 @@ export interface ApiAppointmentAppointment extends Struct.CollectionTypeSchema {
       ]
     >;
     tyreSize: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiBookAppointmentBookAppointment
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'book_appointments';
+  info: {
+    displayName: 'book-appointment';
+    pluralName: 'book-appointments';
+    singularName: 'book-appointment';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    bookingStatus: Schema.Attribute.Enumeration<
+      ['Pending', 'Confirmed', 'In Progress', 'Completed', 'Cancelled']
+    >;
+    carModel: Schema.Attribute.String;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    fullName: Schema.Attribute.String;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::book-appointment.book-appointment'
+    > &
+      Schema.Attribute.Private;
+    location: Schema.Attribute.String;
+    phoneNumber: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    timingSlot: Schema.Attribute.Enumeration<
+      [
+        'Morning (8:00 AM to 12 PM)',
+        'Afternoon (12:00 PM to 4 PM',
+        'Evening (4:00 PM to 10 PM)',
+      ]
+    >;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1110,6 +1189,7 @@ declare module '@strapi/strapi' {
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
       'api::appointment.appointment': ApiAppointmentAppointment;
+      'api::book-appointment.book-appointment': ApiBookAppointmentBookAppointment;
       'api::contact-request.contact-request': ApiContactRequestContactRequest;
       'api::tyre.tyre': ApiTyreTyre;
       'api::vehicle-search.vehicle-search': ApiVehicleSearchVehicleSearch;

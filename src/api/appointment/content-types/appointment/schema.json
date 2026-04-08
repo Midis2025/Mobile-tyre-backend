@@ -49,6 +49,44 @@
         "Rejected",
         "Completed"
       ]
+    },
+    "location": {
+      "type": "enumeration",
+      "enum": [
+        "Guildford",
+        "Woking",
+        "Farnham",
+        "Farnborough",
+        "Aldershot",
+        "Petersfield",
+        "Haslemere",
+        "Godalming",
+        "Cranleigh",
+        "Alton",
+        "Bagshot",
+        "Bordon",
+        "Fleet",
+        "Hindhead",
+        "Liphook",
+        "Lightwater",
+        "Liss",
+        "Midhurst",
+        "Petworth",
+        "Sandhurst",
+        "Virginia Water",
+        "Windlesham",
+        "Yateley",
+        "Ascot",
+        "Bracknell",
+        "Basingstoke",
+        "Southampton",
+        "Frimley",
+        "Tongham",
+        "Church Crookham",
+        "Ash",
+        "Ash Vale",
+        "Hankley Common"
+      ]
     }
   }
 }
