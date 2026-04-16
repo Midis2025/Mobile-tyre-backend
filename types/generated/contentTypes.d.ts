@@ -547,6 +547,7 @@ export interface ApiArrangeACallBackArrangeACallBack
     postcode: Schema.Attribute.String;
     productId: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
+    regNumber: Schema.Attribute.String;
     Season: Schema.Attribute.Enumeration<['Summer', 'Winter', 'All Season']>;
     title: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
