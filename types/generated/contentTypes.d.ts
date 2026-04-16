@@ -519,6 +519,36 @@ export interface ApiAppointmentAppointment extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiArrangeACallBackArrangeACallBack
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'arrange_a_call_backs';
+  info: {
+    displayName: 'Arrange A Call Back';
+    pluralName: 'arrange-a-call-backs';
+    singularName: 'arrange-a-call-back';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::arrange-a-call-back.arrange-a-call-back'
+    > &
+      Schema.Attribute.Private;
+    mobileNumber: Schema.Attribute.String;
+    postcode: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiBookAppointmentBookAppointment
   extends Struct.CollectionTypeSchema {
   collectionName: 'book_appointments';
@@ -1189,6 +1219,7 @@ declare module '@strapi/strapi' {
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
       'api::appointment.appointment': ApiAppointmentAppointment;
+      'api::arrange-a-call-back.arrange-a-call-back': ApiArrangeACallBackArrangeACallBack;
       'api::book-appointment.book-appointment': ApiBookAppointmentBookAppointment;
       'api::contact-request.contact-request': ApiContactRequestContactRequest;
       'api::tyre.tyre': ApiTyreTyre;

@@ -1,0 +1,21 @@
+{
+  "kind": "collectionType",
+  "collectionName": "arrange_a_call_backs",
+  "info": {
+    "singularName": "arrange-a-call-back",
+    "pluralName": "arrange-a-call-backs",
+    "displayName": "Arrange A Call Back"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "mobileNumber": {
+      "type": "string"
+    },
+    "postcode": {
+      "type": "string"
+    }
+  }
+}
