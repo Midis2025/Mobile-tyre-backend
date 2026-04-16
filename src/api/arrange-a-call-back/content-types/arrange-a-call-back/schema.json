@@ -16,6 +16,32 @@
     },
     "postcode": {
       "type": "string"
+    },
+    "width": {
+      "type": "string"
+    },
+    "height": {
+      "type": "string"
+    },
+    "diameter": {
+      "type": "string"
+    },
+    "brand": {
+      "type": "string"
+    },
+    "Season": {
+      "type": "enumeration",
+      "enum": [
+        "Summer",
+        "Winter",
+        "All Season"
+      ]
+    },
+    "productId": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
     }
   }
 }

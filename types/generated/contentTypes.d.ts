@@ -531,9 +531,12 @@ export interface ApiArrangeACallBackArrangeACallBack
     draftAndPublish: true;
   };
   attributes: {
+    brand: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    diameter: Schema.Attribute.String;
+    height: Schema.Attribute.String;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -542,10 +545,14 @@ export interface ApiArrangeACallBackArrangeACallBack
       Schema.Attribute.Private;
     mobileNumber: Schema.Attribute.String;
     postcode: Schema.Attribute.String;
+    productId: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
+    Season: Schema.Attribute.Enumeration<['Summer', 'Winter', 'All Season']>;
+    title: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    width: Schema.Attribute.String;
   };
 }
 
