@@ -441,6 +441,7 @@ export interface ApiAppointmentAppointment extends Struct.CollectionTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
+    address: Schema.Attribute.String;
     bookingStatus: Schema.Attribute.Enumeration<
       ['Pending', 'Approved', 'Rejected', 'Completed']
     >;
@@ -448,50 +449,16 @@ export interface ApiAppointmentAppointment extends Struct.CollectionTypeSchema {
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     fullName: Schema.Attribute.String;
+    latitude: Schema.Attribute.Decimal;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::appointment.appointment'
     > &
       Schema.Attribute.Private;
-    location: Schema.Attribute.Enumeration<
-      [
-        'Guildford \u2013 GU1, GU2, GU3, GU4',
-        'Woking \u2013 GU21, GU22, GU23, GU24',
-        'Farnham \u2013 GU9, GU10',
-        'Farnborough \u2013 GU14',
-        'Aldershot \u2013 GU11, GU12',
-        'Petersfield \u2013 GU31, GU32',
-        'Haslemere \u2013 GU27',
-        'Godalming \u2013 GU7, GU8',
-        'Cranleigh \u2013 GU6',
-        'Alton \u2013 GU34',
-        'Bagshot \u2013 GU19',
-        'Bordon \u2013 GU35',
-        'Fleet \u2013 GU51, GU52',
-        'Hindhead \u2013 GU26',
-        'Liphook \u2013 GU30',
-        'Lightwater \u2013 GU18',
-        'Liss \u2013 GU33',
-        'Midhurst \u2013 GU29',
-        'Petworth \u2013 GU28',
-        'Sandhurst \u2013 GU47',
-        'Virginia Water \u2013 GU25',
-        'Windlesham \u2013 GU20',
-        'Yateley \u2013 GU46',
-        'Ascot \u2013 SL5',
-        'Bracknell \u2013 RG12, RG42',
-        'Basingstoke \u2013 RG21, RG22, RG23, RG24',
-        'Southampton \u2013 SO14, SO15, SO16, SO17, SO18, SO19, SO30, SO31, SO32',
-        'Frimley \u2013 GU16',
-        'Tongham \u2013 GU10',
-        'Church Crookham \u2013 GU52',
-        'Ash \u2013 GU12',
-        'Ash Vale \u2013 GU12',
-        'Hankley Common \u2013 GU10',
-      ]
-    >;
+    longitude: Schema.Attribute.Decimal;
     phoneNumber: Schema.Attribute.String;
+    postcode: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     serviceType: Schema.Attribute.Enumeration<
       [
