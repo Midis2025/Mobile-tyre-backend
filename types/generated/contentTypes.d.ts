@@ -456,6 +456,7 @@ export interface ApiAppointmentAppointment extends Struct.CollectionTypeSchema {
       'api::appointment.appointment'
     > &
       Schema.Attribute.Private;
+    locationNotes: Schema.Attribute.Text;
     longitude: Schema.Attribute.Decimal;
     phoneNumber: Schema.Attribute.String;
     postcode: Schema.Attribute.String;
