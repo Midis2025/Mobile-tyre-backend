@@ -26,7 +26,8 @@
         "Mobile Trailer Tyre Fitting",
         "Precision Wheel Balancing",
         "Emergency Tyre Fitting",
-        "Locking Wheel Nut Removal"
+        "Locking Wheel Nut Removal",
+        "Mobile Tyre Fitting"
       ]
     },
     "tyreSize": {
@@ -38,7 +39,10 @@
         "As Soon As Possible",
         "Morning (8AM - 12PM)",
         "Afternoon (12PM - 4PM)",
-        "Evening (4PM - 8PM)"
+        "Evening (4PM - 8PM)",
+        "Slot 7am - 12pm",
+        "Slot 12pm - 5pm",
+        "Slot 5pm - 12am"
       ]
     },
     "bookingStatus": {
@@ -48,7 +52,8 @@
         "Approved",
         "Rejected",
         "Completed"
-      ]
+      ],
+      "default": "Pending"
     },
     "postcode": {
       "type": "string"
@@ -64,6 +69,9 @@
     },
     "locationNotes": {
       "type": "text"
+    },
+    "vehicleReg": {
+      "type": "string"
     }
   }
 }

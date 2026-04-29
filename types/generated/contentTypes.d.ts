@@ -444,7 +444,8 @@ export interface ApiAppointmentAppointment extends Struct.CollectionTypeSchema {
     address: Schema.Attribute.String;
     bookingStatus: Schema.Attribute.Enumeration<
       ['Pending', 'Approved', 'Rejected', 'Completed']
-    >;
+    > &
+      Schema.Attribute.DefaultTo<'Pending'>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -470,6 +471,7 @@ export interface ApiAppointmentAppointment extends Struct.CollectionTypeSchema {
         'Precision Wheel Balancing',
         'Emergency Tyre Fitting',
         'Locking Wheel Nut Removal',
+        'Mobile Tyre Fitting',
       ]
     >;
     timingSlot: Schema.Attribute.Enumeration<
@@ -478,12 +480,16 @@ export interface ApiAppointmentAppointment extends Struct.CollectionTypeSchema {
         'Morning (8AM - 12PM)',
         'Afternoon (12PM - 4PM)',
         'Evening (4PM - 8PM)',
+        'Slot 7am - 12pm',
+        'Slot 12pm - 5pm',
+        'Slot 5pm - 12am',
       ]
     >;
     tyreSize: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    vehicleReg: Schema.Attribute.String;
   };
 }
 
