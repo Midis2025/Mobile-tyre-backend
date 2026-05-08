@@ -11,19 +11,19 @@ export default {
     processedIds.add(documentId);
     setTimeout(() => processedIds.delete(documentId), 10000);
 
-    console.log(`[Lifecycle] afterCreate triggered for:`, documentId);
+    console.log(`[Lifecycle] afterCreate triggered for arrange-a-call-back:`, documentId);
 
     try {
       // Send admin notification email
       await strapi
-        .service("api::appointment.email" as any)
-        .sendAppointmentNotification(result);
+        .service("api::arrange-a-call-back.email" as any)
+        .sendCallbackNotification(result);
 
       // Send user confirmation email (non-blocking, errors won't stop the process)
       if (result.email) {
         await strapi
-          .service("api::appointment.email" as any)
-          .sendUserConfirmationEmail(result.email, result.fullName, result);
+          .service("api::arrange-a-call-back.email" as any)
+          .sendUserConfirmationEmail(result.email, result.mobileNumber || "Customer", result);
       }
     } catch (err: any) {
       console.error("[Production Email Error]:", err);

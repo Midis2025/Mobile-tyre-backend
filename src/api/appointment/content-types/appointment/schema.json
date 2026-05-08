@@ -14,6 +14,9 @@
     "fullName": {
       "type": "string"
     },
+    "email": {
+      "type": "email"
+    },
     "phoneNumber": {
       "type": "string"
     },

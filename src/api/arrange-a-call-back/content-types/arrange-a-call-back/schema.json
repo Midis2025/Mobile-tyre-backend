@@ -14,6 +14,9 @@
     "mobileNumber": {
       "type": "string"
     },
+    "email": {
+      "type": "email"
+    },
     "postcode": {
       "type": "string"
     },

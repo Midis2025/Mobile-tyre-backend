@@ -11,18 +11,18 @@ export default {
     processedIds.add(documentId);
     setTimeout(() => processedIds.delete(documentId), 10000);
 
-    console.log(`[Lifecycle] afterCreate triggered for:`, documentId);
+    console.log(`[Lifecycle] afterCreate triggered for contact-request:`, documentId);
 
     try {
       // Send admin notification email
       await strapi
-        .service("api::appointment.email" as any)
-        .sendAppointmentNotification(result);
+        .service("api::contact-request.email" as any)
+        .sendContactNotification(result);
 
       // Send user confirmation email (non-blocking, errors won't stop the process)
       if (result.email) {
         await strapi
-          .service("api::appointment.email" as any)
+          .service("api::contact-request.email" as any)
           .sendUserConfirmationEmail(result.email, result.fullName, result);
       }
     } catch (err: any) {
