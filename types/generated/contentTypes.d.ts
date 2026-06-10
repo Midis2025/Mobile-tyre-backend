@@ -621,6 +621,46 @@ export interface ApiContactRequestContactRequest
   };
 }
 
+export interface ApiReviewReview extends Struct.CollectionTypeSchema {
+  collectionName: 'reviews';
+  info: {
+    description: 'Customer Reviews';
+    displayName: 'Review';
+    pluralName: 'reviews';
+    singularName: 'review';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::review.review'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    rating: Schema.Attribute.Integer &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMax<
+        {
+          max: 5;
+          min: 1;
+        },
+        number
+      >;
+    reviewerName: Schema.Attribute.String & Schema.Attribute.Required;
+    reviewText: Schema.Attribute.Text & Schema.Attribute.Required;
+    timeElapsed: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiTyreTyre extends Struct.CollectionTypeSchema {
   collectionName: 'tyres';
   info: {
@@ -1208,6 +1248,7 @@ declare module '@strapi/strapi' {
       'api::arrange-a-call-back.arrange-a-call-back': ApiArrangeACallBackArrangeACallBack;
       'api::book-appointment.book-appointment': ApiBookAppointmentBookAppointment;
       'api::contact-request.contact-request': ApiContactRequestContactRequest;
+      'api::review.review': ApiReviewReview;
       'api::tyre.tyre': ApiTyreTyre;
       'api::vehicle-search.vehicle-search': ApiVehicleSearchVehicleSearch;
       'plugin::content-releases.release': PluginContentReleasesRelease;
