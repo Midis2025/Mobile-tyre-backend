@@ -533,6 +533,43 @@ export interface ApiArrangeACallBackArrangeACallBack
   };
 }
 
+export interface ApiBlogBlog extends Struct.CollectionTypeSchema {
+  collectionName: 'blogs';
+  info: {
+    displayName: 'blog';
+    pluralName: 'blogs';
+    singularName: 'blog';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    content: Schema.Attribute.RichText &
+      Schema.Attribute.CustomField<
+        'plugin::ckeditor5.CKEditor',
+        {
+          preset: 'defaultHtml';
+        }
+      >;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    excerpt: Schema.Attribute.RichText;
+    featuredImage: Schema.Attribute.Media<
+      'images' | 'files' | 'videos' | 'audios'
+    >;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<'oneToMany', 'api::blog.blog'> &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    slug: Schema.Attribute.UID<'title'>;
+    title: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiBookAppointmentBookAppointment
   extends Struct.CollectionTypeSchema {
   collectionName: 'book_appointments';
@@ -1246,6 +1283,7 @@ declare module '@strapi/strapi' {
       'admin::user': AdminUser;
       'api::appointment.appointment': ApiAppointmentAppointment;
       'api::arrange-a-call-back.arrange-a-call-back': ApiArrangeACallBackArrangeACallBack;
+      'api::blog.blog': ApiBlogBlog;
       'api::book-appointment.book-appointment': ApiBookAppointmentBookAppointment;
       'api::contact-request.contact-request': ApiContactRequestContactRequest;
       'api::review.review': ApiReviewReview;
