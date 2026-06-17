@@ -77,7 +77,7 @@ export default ({ strapi }: { strapi: any }) => {
             </div>
             
             <div style="background-color: #0c162d; color: #ffffff; padding: 40px 20px; text-align: center;">
-              <img src="https://www.mobiletyrechampions.com/images/MTC%20logo%202.png" alt="Mobile Tyre Champions Logo" style="width: 80px; height: auto; margin: 0 auto 20px auto; display: block;">
+              <img src="https://mobiletyrechampions.com/images/MTC%20logo%202.webp" alt="Mobile Tyre Champions Logo" style="width: 80px; height: auto; margin: 0 auto 20px auto; display: block;">
               <div style="margin-bottom: 25px;">
                 <a href="https://www.mobiletyrechampions.com/about" style="color: #ffffff; text-decoration: none; font-size: 13px; margin: 0 8px;">About</a> |
                 <a href="https://www.mobiletyrechampions.com/find-tyres" style="color: #ffffff; text-decoration: none; font-size: 13px; margin: 0 8px;">Find Tyres</a> |
