@@ -658,6 +658,76 @@ export interface ApiContactRequestContactRequest
   };
 }
 
+export interface ApiEmergencyRequestEmergencyRequest
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'emergency_requests';
+  info: {
+    displayName: 'Emergency Request';
+    pluralName: 'emergency-requests';
+    singularName: 'emergency-request';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    email: Schema.Attribute.Email;
+    fullName: Schema.Attribute.String;
+    issue: Schema.Attribute.RichText;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::emergency-request.emergency-request'
+    > &
+      Schema.Attribute.Private;
+    location: Schema.Attribute.String;
+    phoneNumber: Schema.Attribute.String;
+    postcode: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiQuoteRequestQuoteRequest
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'quote_requests';
+  info: {
+    displayName: 'Quote Request';
+    pluralName: 'quote-requests';
+    singularName: 'quote-request';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    email: Schema.Attribute.Email;
+    fullName: Schema.Attribute.String;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::quote-request.quote-request'
+    > &
+      Schema.Attribute.Private;
+    message: Schema.Attribute.RichText;
+    phoneNumber: Schema.Attribute.String;
+    postcode: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    serviceType: Schema.Attribute.String;
+    tyreSize: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    vehicleType: Schema.Attribute.String;
+  };
+}
+
 export interface ApiReviewReview extends Struct.CollectionTypeSchema {
   collectionName: 'reviews';
   info: {
@@ -1286,6 +1356,8 @@ declare module '@strapi/strapi' {
       'api::blog.blog': ApiBlogBlog;
       'api::book-appointment.book-appointment': ApiBookAppointmentBookAppointment;
       'api::contact-request.contact-request': ApiContactRequestContactRequest;
+      'api::emergency-request.emergency-request': ApiEmergencyRequestEmergencyRequest;
+      'api::quote-request.quote-request': ApiQuoteRequestQuoteRequest;
       'api::review.review': ApiReviewReview;
       'api::tyre.tyre': ApiTyreTyre;
       'api::vehicle-search.vehicle-search': ApiVehicleSearchVehicleSearch;

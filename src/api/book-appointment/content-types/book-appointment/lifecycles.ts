@@ -1,32 +1,33 @@
-const processedIds = new Set();
+import metaService from '../../../../services/meta-conversions';
+import crypto from 'crypto';
 
 export default {
-  async afterCreate(event: any) {
+  async afterCreate(event) {
     const { result } = event;
-    const documentId = result.documentId || result.id;
 
-    // Prevent double execution for the same ID in a short window
-    if (processedIds.has(documentId)) return;
+    // We do not await this so it doesn't block the request/response cycle
+    (async () => {
+      try {
+        const eventId = crypto.randomUUID();
+        
+        const userData = {
+          email: result.email,
+          phone: result.phoneNumber,
+          firstName: result.fullName?.split(' ')[0],
+          lastName: result.fullName?.split(' ').slice(1).join(' '),
+        };
 
-    processedIds.add(documentId);
-    setTimeout(() => processedIds.delete(documentId), 10000);
+        const customData = {
+          serviceType: 'Booking',
+          vehicleType: result.carModel,
+          location: result.location,
+          timingSlot: result.timingSlot,
+        };
 
-    console.log(`[Lifecycle] afterCreate triggered for book-appointment:`, documentId);
-
-    try {
-      // Send admin notification email
-      await strapi
-        .service("api::book-appointment.email" as any)
-        .sendBookingNotification(result);
-
-      // Send user confirmation email (non-blocking, errors won't stop the process)
-      if (result.email) {
-        await strapi
-          .service("api::book-appointment.email" as any)
-          .sendUserConfirmationEmail(result.email, result.fullName, result);
+        await metaService.sendScheduleEvent(eventId, userData, customData);
+      } catch (error) {
+        strapi.log.error('Failed to trigger Meta Conversions API for book-appointment:', error);
       }
-    } catch (err: any) {
-      console.error("[Production Email Error]:", err);
-    }
+    })();
   },
 };

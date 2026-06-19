@@ -1,0 +1,39 @@
+{
+  "kind": "collectionType",
+  "collectionName": "quote_requests",
+  "info": {
+    "singularName": "quote-request",
+    "pluralName": "quote-requests",
+    "displayName": "Quote Request"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "fullName": {
+      "type": "string"
+    },
+    "email": {
+      "type": "email"
+    },
+    "phoneNumber": {
+      "type": "string"
+    },
+    "postcode": {
+      "type": "string"
+    },
+    "vehicleType": {
+      "type": "string"
+    },
+    "tyreSize": {
+      "type": "string"
+    },
+    "serviceType": {
+      "type": "string"
+    },
+    "message": {
+      "type": "richtext"
+    }
+  }
+}

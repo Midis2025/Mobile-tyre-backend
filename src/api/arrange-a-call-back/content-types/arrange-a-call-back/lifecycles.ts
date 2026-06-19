@@ -1,32 +1,31 @@
-const processedIds = new Set();
+import metaService from '../../../../services/meta-conversions';
+import crypto from 'crypto';
 
 export default {
-  async afterCreate(event: any) {
+  async afterCreate(event) {
     const { result } = event;
-    const documentId = result.documentId || result.id;
 
-    // Prevent double execution for the same ID in a short window
-    if (processedIds.has(documentId)) return;
+    // We do not await this so it doesn't block the request/response cycle
+    (async () => {
+      try {
+        const eventId = crypto.randomUUID();
+        
+        const userData = {
+          email: result.email,
+          phone: result.mobileNumber,
+          postcode: result.postcode,
+        };
 
-    processedIds.add(documentId);
-    setTimeout(() => processedIds.delete(documentId), 10000);
+        const customData = {
+          serviceType: 'Call Back',
+          vehicleType: result.brand,
+          message: result.title,
+        };
 
-    console.log(`[Lifecycle] afterCreate triggered for arrange-a-call-back:`, documentId);
-
-    try {
-      // Send admin notification email
-      await strapi
-        .service("api::arrange-a-call-back.email" as any)
-        .sendCallbackNotification(result);
-
-      // Send user confirmation email (non-blocking, errors won't stop the process)
-      if (result.email) {
-        await strapi
-          .service("api::arrange-a-call-back.email" as any)
-          .sendUserConfirmationEmail(result.email, result.mobileNumber || "Customer", result);
+        await metaService.sendLeadEvent(eventId, userData, customData);
+      } catch (error) {
+        strapi.log.error('Failed to trigger Meta Conversions API for arrange-a-call-back:', error);
       }
-    } catch (err: any) {
-      console.error("[Production Email Error]:", err);
-    }
+    })();
   },
 };

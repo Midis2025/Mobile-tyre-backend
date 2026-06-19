@@ -12,20 +12,21 @@ export default {
         
         const userData = {
           email: result.email,
-          phone: result.phoneNumber || result.phone,
+          phone: result.phoneNumber,
           firstName: result.fullName?.split(' ')[0],
           lastName: result.fullName?.split(' ').slice(1).join(' '),
           postcode: result.postcode,
         };
 
         const customData = {
-          serviceType: result.serviceRequired,
-          message: result.message,
+          serviceType: 'Emergency Tyre Assistance',
+          location: result.location,
+          message: result.issue,
         };
 
         await metaService.sendLeadEvent(eventId, userData, customData);
       } catch (error) {
-        strapi.log.error('Failed to trigger Meta Conversions API for contact-request:', error);
+        strapi.log.error('Failed to trigger Meta Conversions API for emergency-request:', error);
       }
     })();
   },
