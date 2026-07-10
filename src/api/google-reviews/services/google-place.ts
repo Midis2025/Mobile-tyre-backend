@@ -1,137 +1,114 @@
 import axios from 'axios';
-import fs from 'fs';
-import path from 'path';
+
+// ─── Target Business Constants (for validation) ─────────────────────────────
+const TARGET_NAME_FRAGMENT = 'Mobile Tyre Champions';
+const TARGET_WEBSITE       = 'mobiletyrechampions.com';
+
+// ─── Field mask for validation ───────────────────────────────────────────────
+const VALIDATE_FIELD_MASK =
+  'displayName,websiteUri,nationalPhoneNumber,rating,userRatingCount,googleMapsUri';
 
 export interface GooglePlaceService {
   getPlaceId(): Promise<string>;
-  searchPlaceId(): Promise<string>;
+  validatePlaceId(placeId: string): Promise<boolean>;
   cachePlaceId(placeId: string): Promise<void>;
 }
 
 export default ({ strapi }: { strapi: any }) => {
-  // Configured target paths & fallback search info
-  const envPath = path.resolve(process.cwd(), '.env');
-  const textQuery = 'Mobile Tyre Champions 78A Grosvenor Rd Aldershot GU11 3HY United Kingdom';
-
   return {
     /**
-     * Retrieves the place ID using local store, .env fallback, or live Search API.
+     * Returns the Google Place ID for Mobile Tyre Champions.
+     *
+     * Priority:
+     *  1. GOOGLE_PLACE_ID from .env (primary — always preferred)
+     *  2. DB cache (Strapi store, 12-month TTL)
+     *
+     * Throws if neither source provides a Place ID.
      */
     async getPlaceId(): Promise<string> {
-      // 1. Check if GOOGLE_PLACE_ID is present in process.env
-      if (process.env.GOOGLE_PLACE_ID && process.env.GOOGLE_PLACE_ID.trim() !== '') {
-        strapi.log.info('Using configured GOOGLE_PLACE_ID from environment.');
-        return process.env.GOOGLE_PLACE_ID;
+      // 1. Use the env variable (this is the confirmed, production Place ID)
+      const envPlaceId = process.env.GOOGLE_PLACE_ID?.trim();
+      if (envPlaceId) {
+        strapi.log.info('[GooglePlace] Using GOOGLE_PLACE_ID from environment.');
+        return envPlaceId;
       }
 
-      // 2. Check if cached in Strapi database store
-      const store = strapi.store({ type: 'api', name: 'google-reviews' });
-      const cached = await store.get({ key: 'google_place_id_cache' }) as any;
-      if (cached && cached.placeId) {
-        const twelveMonthsInMs = 365 * 24 * 60 * 60 * 1000;
-        if (Date.now() - cached.timestamp < twelveMonthsInMs) {
-          strapi.log.info('Using cached Google Place ID from database store.');
-          return cached.placeId;
+      // 2. Fall back to DB cache
+      try {
+        const store = strapi.store({ type: 'api', name: 'google-reviews' });
+        const cached = (await store.get({ key: 'google_place_id_cache' })) as any;
+        if (cached?.placeId) {
+          const twelveMonths = 365 * 24 * 60 * 60 * 1000;
+          if (Date.now() - cached.timestamp < twelveMonths) {
+            strapi.log.info('[GooglePlace] Using cached Google Place ID from DB store.');
+            return cached.placeId as string;
+          }
+          strapi.log.warn('[GooglePlace] Cached Place ID is older than 12 months — expired.');
         }
-        strapi.log.info('Cached Google Place ID is older than 12 months, refreshing...');
+      } catch (err: any) {
+        strapi.log.warn(`[GooglePlace] Failed to read DB cache: ${err.message}`);
       }
 
-      // 3. Not found or expired: search programmatically
-      const placeId = await this.searchPlaceId();
-      await this.cachePlaceId(placeId);
-      return placeId;
+      throw new Error(
+        '[GooglePlace] GOOGLE_PLACE_ID is not set in environment variables and no valid DB cache exists. ' +
+        'Please set GOOGLE_PLACE_ID in your .env file.'
+      );
     },
 
     /**
-     * Programmatically performs a Text Search request to find the Place ID.
+     * Validates a Place ID by calling the Google Places API (New) and checking
+     * that the returned business matches Mobile Tyre Champions.
      */
-    async searchPlaceId(): Promise<string> {
+    async validatePlaceId(placeId: string): Promise<boolean> {
       const apiKey = process.env.GOOGLE_MAPS_API_KEY;
-      if (!apiKey) {
-        throw new Error('Google Maps API Key is missing (GOOGLE_MAPS_API_KEY).');
-      }
+      if (!apiKey || !placeId) return false;
 
-      strapi.log.info('Searching Google Place ID programmatically...');
       try {
-        const response = await axios.post(
-          'https://places.googleapis.com/v1/places:searchText',
-          { textQuery },
+        const response = await axios.get(
+          `https://places.googleapis.com/v1/places/${placeId}`,
           {
             headers: {
               'Content-Type': 'application/json',
               'X-Goog-Api-Key': apiKey,
-              'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress',
+              'X-Goog-FieldMask': VALIDATE_FIELD_MASK,
             },
+            timeout: 10_000,
           }
         );
 
-        const places = response.data?.places || [];
-        if (places.length === 0) {
-          throw new Error('Google Places API returned no results for the search query.');
-        }
+        const data    = response.data;
+        const name    = (data.displayName?.text || '').toLowerCase();
+        const website = (data.websiteUri || '').toLowerCase();
 
-        // Filtering matching result
-        let selectedPlace = places[0];
-        if (places.length > 1) {
-          const match = places.find((p: any) => {
-            const name = (p.displayName?.text || '').toLowerCase();
-            const address = (p.formattedAddress || '').toLowerCase();
-            return (
-              name.includes('mobile tyre champions') &&
-              address.includes('aldershot') &&
-              address.includes('gu11 3hy')
-            );
-          });
-          if (match) {
-            selectedPlace = match;
-          }
-        }
+        const nameOk    = name.includes(TARGET_NAME_FRAGMENT.toLowerCase());
+        const websiteOk = website.includes(TARGET_WEBSITE);
 
-        const placeId = selectedPlace.id;
-        if (!placeId) {
-          throw new Error('Discovered place payload contains no valid ID.');
-        }
+        strapi.log.info(
+          `[GooglePlace] Validation — name:${nameOk} website:${websiteOk} ` +
+          `| displayName="${data.displayName?.text}" website="${data.websiteUri}" ` +
+          `phone="${data.nationalPhoneNumber}" rating=${data.rating} reviews=${data.userRatingCount}`
+        );
 
-        strapi.log.info(`Google Place ID discovered successfully: ${placeId}`);
-        return placeId;
-      } catch (error: any) {
-        strapi.log.error(`Failed programmatically searching Google Place ID: ${error.message}`);
-        throw error;
+        return nameOk && websiteOk;
+      } catch (err: any) {
+        strapi.log.warn(`[GooglePlace] Validation failed for "${placeId}": ${err.message}`);
+        return false;
       }
     },
 
     /**
-     * Caches the discovered Place ID in the database and tries updating the local .env.
+     * Persists a validated Place ID to the Strapi DB store.
      */
     async cachePlaceId(placeId: string): Promise<void> {
       try {
-        // Cache to Database store
         const store = strapi.store({ type: 'api', name: 'google-reviews' });
         await store.set({
           key: 'google_place_id_cache',
-          value: {
-            placeId,
-            timestamp: Date.now(),
-          },
+          value: { placeId, timestamp: Date.now() },
         });
-
-        // Set on running env context
-        process.env.GOOGLE_PLACE_ID = placeId;
-
-        // Try writing back to .env file if writable
-        if (fs.existsSync(envPath)) {
-          let envContent = fs.readFileSync(envPath, 'utf8');
-          const regex = /^GOOGLE_PLACE_ID=.*$/m;
-          if (regex.test(envContent)) {
-            envContent = envContent.replace(regex, `GOOGLE_PLACE_ID=${placeId}`);
-          } else {
-            envContent += `\nGOOGLE_PLACE_ID=${placeId}\n`;
-          }
-          fs.writeFileSync(envPath, envContent, 'utf8');
-          strapi.log.info('Updated local .env file with discovered GOOGLE_PLACE_ID.');
-        }
+        strapi.log.info(`[GooglePlace] Cached Place ID "${placeId}" in DB store.`);
       } catch (err: any) {
-        strapi.log.warn(`Could not persist discovered Place ID to .env file: ${err.message}`);
+        strapi.log.warn(`[GooglePlace] Could not persist Place ID: ${err.message}`);
       }
     },
   };
