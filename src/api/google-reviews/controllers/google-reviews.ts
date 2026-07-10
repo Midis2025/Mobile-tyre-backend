@@ -65,13 +65,25 @@ export default {
       const cacheKey = 'places_reviews_cache';
       const cachedData: any = await store.get({ key: cacheKey });
 
+      const CORRECT_BUSINESS = 'Mobile Tyre Champions';
+
       if (cachedData?.timestamp && cachedData?.data) {
-        if (Date.now() - cachedData.timestamp < CACHE_TTL_MS) {
+        const cachedName = (cachedData.data.businessName || '').toLowerCase();
+        const isCorrectBusiness = cachedName.includes(CORRECT_BUSINESS.toLowerCase());
+        const isNotExpired = Date.now() - cachedData.timestamp < CACHE_TTL_MS;
+
+        if (isCorrectBusiness && isNotExpired) {
           strapi.log.info('[GoogleReviews] Serving cached response.');
           ctx.body = { success: true, data: cachedData.data };
           return;
         }
-        strapi.log.info('[GoogleReviews] Cache expired — fetching fresh data.');
+
+        if (!isCorrectBusiness) {
+          strapi.log.warn(`[GoogleReviews] Cache has wrong business "${cachedData.data.businessName}" — clearing and fetching fresh.`);
+          await store.delete({ key: cacheKey });
+        } else {
+          strapi.log.info('[GoogleReviews] Cache expired — fetching fresh data.');
+        }
       }
 
       // ── Fetch fresh data ───────────────────────────────────────────
