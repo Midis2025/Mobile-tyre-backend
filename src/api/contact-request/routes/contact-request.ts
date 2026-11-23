@@ -4,4 +4,7 @@
 
 import { factories } from '@strapi/strapi';
 
-export default factories.createCoreRouter('api::contact-request.contact-request');
+export default factories.createCoreRouter('api::contact-request.contact-request', {
+  only: ['create'],
+});
+

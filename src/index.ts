@@ -1,4 +1,5 @@
 import type { Core } from '@strapi/strapi';
+import { validateResendConfig } from './services/resend';
 
 // The correct business name fragment — used to detect stale cache from wrong businesses
 const CORRECT_BUSINESS_NAME = 'Mobile Tyre Champions';
@@ -20,6 +21,19 @@ export default {
    * any stale review caches that belong to the wrong business.
    */
   async bootstrap({ strapi }: { strapi: Core.Strapi }) {
+    // ── Validate Resend Email Configuration on Startup ─────────────
+    const resendStatus = validateResendConfig();
+    if (resendStatus.isConfigured) {
+      strapi.log.info(
+        `[Email Service] ✅ Resend initialized successfully. ` +
+        `API Key: Configured. Sender: "${resendStatus.emailFrom}". Admin Recipient: "${resendStatus.adminEmail}".`
+      );
+    } else {
+      strapi.log.error(
+        `[Email Service] ❌ Resend configuration incomplete: ${resendStatus.errors.join('; ')}`
+      );
+    }
+
     const placeId = process.env.GOOGLE_PLACE_ID?.trim();
     const apiKey = process.env.GOOGLE_MAPS_API_KEY?.trim();
 

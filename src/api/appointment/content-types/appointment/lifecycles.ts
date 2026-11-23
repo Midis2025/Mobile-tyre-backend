@@ -9,24 +9,27 @@ export default {
     if (processedIds.has(documentId)) return;
 
     processedIds.add(documentId);
-    setTimeout(() => processedIds.delete(documentId), 10000);
+    setTimeout(() => processedIds.delete(documentId), 30000);
 
-    console.log(`[Lifecycle] afterCreate triggered for:`, documentId);
+    console.log(`[Lifecycle] afterCreate triggered for appointment:`, documentId);
 
-    try {
-      // Send admin notification email
-      await strapi
-        .service("api::appointment.email" as any)
-        .sendAppointmentNotification(result);
-
-      // Send user confirmation email (non-blocking, errors won't stop the process)
-      if (result.email) {
+    // Asynchronous non-blocking dispatch
+    (async () => {
+      try {
+        // 1. Send admin notification email via Resend
         await strapi
           .service("api::appointment.email" as any)
-          .sendUserConfirmationEmail(result.email, result.fullName, result);
+          .sendAppointmentNotification(result);
+
+        // 2. Send user confirmation email via Resend (if customer email is provided)
+        if (result.email && typeof result.email === 'string' && result.email.trim().length > 0) {
+          await strapi
+            .service("api::appointment.email" as any)
+            .sendUserConfirmationEmail(result.email, result.fullName, result);
+        }
+      } catch (err: any) {
+        console.error("[Appointment Email Error]:", err?.message || err);
       }
-    } catch (err: any) {
-      console.error("[Production Email Error]:", err);
-    }
+    })();
   },
 };

@@ -1,3 +1,6 @@
 import { factories } from '@strapi/strapi';
 
-export default factories.createCoreRouter('api::quote-request.quote-request');
+export default factories.createCoreRouter('api::quote-request.quote-request', {
+  only: ['create'],
+});
+

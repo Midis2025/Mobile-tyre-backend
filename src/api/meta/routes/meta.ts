@@ -5,7 +5,7 @@ export default {
       path: '/meta/test-event',
       handler: 'meta.testEvent',
       config: {
-        auth: false, // adjust based on security needs (false for testing/public endpoint)
+        // Requires authentication; cannot be called publicly
       },
     },
     {
@@ -13,7 +13,7 @@ export default {
       path: '/meta/stats',
       handler: 'meta.stats',
       config: {
-        auth: false, // adjust based on security needs
+        // Requires authentication; cannot be called publicly
       },
     },
   ],

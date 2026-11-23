@@ -1,12 +1,39 @@
 import metaService from '../../../../services/meta-conversions';
 import crypto from 'crypto';
 
-export default {
-  async afterCreate(event) {
-    const { result } = event;
+const processedIds = new Set();
 
-    // We do not await this so it doesn't block the request/response cycle
+export default {
+  async afterCreate(event: any) {
+    const { result } = event;
+    const documentId = result.documentId || result.id;
+
+    if (processedIds.has(documentId)) return;
+    processedIds.add(documentId);
+    setTimeout(() => processedIds.delete(documentId), 30000);
+
+    console.log(`[Lifecycle] afterCreate triggered for contact-request:`, documentId);
+
+    // Asynchronous non-blocking dispatch
     (async () => {
+      // ── 1. Resend Email Dispatch ─────────────────────────────────────
+      try {
+        // Send admin notification
+        await strapi
+          .service("api::contact-request.email" as any)
+          .sendContactNotification(result);
+
+        // Send user confirmation if valid customer email is present
+        if (result.email && typeof result.email === 'string' && result.email.trim().length > 0) {
+          await strapi
+            .service("api::contact-request.email" as any)
+            .sendUserConfirmationEmail(result.email, result.fullName, result);
+        }
+      } catch (emailErr: any) {
+        console.error("[Contact Request Email Error]:", emailErr?.message || emailErr);
+      }
+
+      // ── 2. Meta Conversions API (Completely Independent) ─────────────
       try {
         const eventId = crypto.randomUUID();
         
@@ -24,8 +51,8 @@ export default {
         };
 
         await metaService.sendLeadEvent(eventId, userData, customData);
-      } catch (error) {
-        strapi.log.error('Failed to trigger Meta Conversions API for contact-request:', error);
+      } catch (metaErr: any) {
+        strapi.log.error('Failed to trigger Meta Conversions API for contact-request:', metaErr);
       }
     })();
   },
