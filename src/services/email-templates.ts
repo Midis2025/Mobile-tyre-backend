@@ -1,4 +1,125 @@
+import fs from 'fs';
+import path from 'path';
 import { escapeHtml } from './resend';
+
+let cachedMtcAdminTemplateHtml: string | null = null;
+
+/**
+ * Loads the premium MTC admin notification HTML template from mtc-templates.
+ * Searches across dist, src, and project root candidate paths.
+ */
+const getMtcAdminTemplateHtml = (): string | null => {
+  const candidatePaths = [
+    path.join(__dirname, 'mtc-templates', 'admin-appointment-email-strapi.html'),
+    path.join(__dirname, '../mtc-templates', 'admin-appointment-email-strapi.html'),
+    path.join(process.cwd(), 'src', 'services', 'mtc-templates', 'admin-appointment-email-strapi.html'),
+    path.join(process.cwd(), 'src', 'mtc-templates', 'admin-appointment-email-strapi.html'),
+    path.join(process.cwd(), 'dist', 'src', 'services', 'mtc-templates', 'admin-appointment-email-strapi.html'),
+    path.join(process.cwd(), 'dist', 'src', 'mtc-templates', 'admin-appointment-email-strapi.html'),
+  ];
+
+  for (const candidate of candidatePaths) {
+    try {
+      if (fs.existsSync(candidate)) {
+        return fs.readFileSync(candidate, 'utf8');
+      }
+    } catch {
+      // Continue to next path
+    }
+  }
+
+  return null;
+};
+
+interface MtcAdminTemplateData {
+  customerName: string;
+  email: string;
+  phone: string;
+  vehicleRegistration: string;
+  serviceRequired: string;
+  preferredDate: string;
+  preferredTime: string;
+  postcode: string;
+  fullAddress: string;
+  customerMessage: string;
+  adminDashboardUrl: string;
+  headlineTitle?: string;
+  headlineSubtext?: string;
+  card2Title?: string;
+}
+
+/**
+ * Renders the premium MTC admin notification template with dynamic placeholders
+ * and handles message vs. fallback card visibility.
+ */
+const renderMtcAdminTemplate = (data: MtcAdminTemplateData): string | null => {
+  const template = getMtcAdminTemplateHtml();
+  if (!template) {
+    return null;
+  }
+
+  let html = template;
+
+  if (data.headlineTitle) {
+    html = html.replace(/NEW APPOINTMENT RECEIVED/g, data.headlineTitle);
+    html = html.replace(/New Appointment Received/g, data.headlineTitle);
+  }
+  if (data.headlineSubtext) {
+    html = html.replace(
+      /A customer has submitted a new appointment request\. Here are the details:/g,
+      data.headlineSubtext
+    );
+  }
+  if (data.card2Title) {
+    html = html.replace(/Booking Details/g, data.card2Title);
+  }
+
+  const map: Record<string, string> = {
+    customerName: data.customerName,
+    email: data.email,
+    phone: data.phone,
+    vehicleRegistration: data.vehicleRegistration,
+    serviceRequired: data.serviceRequired,
+    preferredDate: data.preferredDate,
+    preferredTime: data.preferredTime,
+    postcode: data.postcode,
+    fullAddress: data.fullAddress,
+    customerMessage: data.customerMessage || '',
+    adminDashboardUrl: data.adminDashboardUrl,
+  };
+
+  for (const [key, val] of Object.entries(map)) {
+    const regex = new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, 'g');
+    html = html.replace(regex, val);
+  }
+
+  // Official logo
+  html = html.replace(
+    /\{\{\s*logoUrl\s*\|\|\s*'[^']+'\s*\}\}/g,
+    'https://www.mobiletyrechampions.com/images/MTC%20logo%202.webp'
+  );
+
+  const hasMessage = Boolean(
+    data.customerMessage &&
+    data.customerMessage.trim().length > 0 &&
+    data.customerMessage !== 'N/A' &&
+    data.customerMessage !== 'No additional notes provided.'
+  );
+
+  if (hasMessage) {
+    html = html.replace(
+      /<!-- Fallback when no message provided -->[\s\S]*?<!--<!\[endif\]-->/g,
+      ''
+    );
+  } else {
+    html = html.replace(
+      /<!-- CARD 3: CUSTOMER MESSAGE -->[\s\S]*?<!-- Fallback when no message provided -->/g,
+      ''
+    );
+  }
+
+  return html;
+};
 
 // Shared footer component preserving brand information, social icons, and address
 const renderEmailFooter = (showCopyright = true): string => `
@@ -38,16 +159,51 @@ export const buildAppointmentAdminEmail = (appointment: any): string => {
   const fullName = escapeHtml(appointment.fullName) || 'N/A';
   const phoneNumber = escapeHtml(appointment.phoneNumber) || 'N/A';
   const email = escapeHtml(appointment.email) || 'N/A';
-  const serviceType = escapeHtml(appointment.serviceType) || 'N/A';
-  const tyreSize = escapeHtml(appointment.tyreSize) || 'N/A';
-  const timingSlot = escapeHtml(appointment.timingSlot) || 'N/A';
+  const serviceType = escapeHtml(appointment.serviceType) || 'Mobile Tyre Fitting';
+  const tyreSize = escapeHtml(appointment.tyreSize);
+  const timingSlot = escapeHtml(appointment.timingSlot) || 'As Soon As Possible';
   const bookingStatus = escapeHtml(appointment.bookingStatus) || 'Pending';
   const postcode = escapeHtml(appointment.postcode) || 'N/A';
-  const address = escapeHtml(appointment.address) || 'N/A';
+  const address = escapeHtml(appointment.address) || postcode;
   const vehicleReg = escapeHtml(appointment.vehicleReg) || 'N/A';
   const lat = escapeHtml(appointment.latitude) || '0';
   const lng = escapeHtml(appointment.longitude) || '0';
-  const locationNotes = escapeHtml(appointment.locationNotes) || 'No additional notes provided.';
+  const locationNotes = escapeHtml(appointment.locationNotes) || '';
+
+  const formattedDate = new Date().toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+
+  const adminUrl = process.env.STRAPI_ADMIN_URL || 'https://mobiletyrechampions.com';
+  const recordId = appointment.documentId || appointment.id || '';
+  const adminDashboardUrl = recordId
+    ? `${adminUrl}/admin/content-manager/collection-types/api::appointment.appointment/${recordId}`
+    : `${adminUrl}/admin`;
+
+  const serviceWithTyre = tyreSize ? `${serviceType} (${tyreSize})` : serviceType;
+
+  // Attempt to render the premium MTC admin appointment template from mtc-templates
+  const mtcHtml = renderMtcAdminTemplate({
+    customerName: fullName,
+    email,
+    phone: phoneNumber,
+    vehicleRegistration: vehicleReg,
+    serviceRequired: serviceWithTyre,
+    preferredDate: formattedDate,
+    preferredTime: timingSlot,
+    postcode,
+    fullAddress: address,
+    customerMessage: locationNotes,
+    adminDashboardUrl,
+  });
+
+  if (mtcHtml) {
+    return mtcHtml;
+  }
+
+  // Resilient fallback to inline template if external file is unavailable
 
   return `
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 20px auto; border: none; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
@@ -240,13 +396,50 @@ export const buildAppointmentCustomerEmail = (userName?: string, appointment?: a
  */
 
 export const buildContactAdminEmail = (contactRequest: any): string => {
-  const fullName = escapeHtml(contactRequest.fullName) || 'N/A';
+  const fullName = escapeHtml(contactRequest.fullName) || 'Inquiry';
   const email = escapeHtml(contactRequest.email) || 'N/A';
   const phoneNumber = escapeHtml(contactRequest.phoneNumber) || 'N/A';
-  const serviceRequired = escapeHtml(contactRequest.serviceRequired) || 'N/A';
+  const serviceRequired = escapeHtml(contactRequest.serviceRequired) || 'General Inquiry';
   const postcode = escapeHtml(contactRequest.postcode) || 'N/A';
   const bookingStatus = escapeHtml(contactRequest.bookingStatus) || 'Pending';
-  const message = escapeHtml(contactRequest.message) || 'No message provided.';
+  const message = escapeHtml(contactRequest.message) || '';
+  const vehicleReg = escapeHtml(contactRequest.vehicleReg) || 'N/A';
+
+  const formattedDate = new Date().toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+
+  const adminUrl = process.env.STRAPI_ADMIN_URL || 'https://mobiletyrechampions.com';
+  const recordId = contactRequest.documentId || contactRequest.id || '';
+  const adminDashboardUrl = recordId
+    ? `${adminUrl}/admin/content-manager/collection-types/api::contact-request.contact-request/${recordId}`
+    : `${adminUrl}/admin`;
+
+  // Attempt to render the premium MTC admin template from mtc-templates customized for contact queries
+  const mtcHtml = renderMtcAdminTemplate({
+    customerName: fullName,
+    email,
+    phone: phoneNumber,
+    vehicleRegistration: vehicleReg,
+    serviceRequired,
+    preferredDate: formattedDate,
+    preferredTime: 'N/A (General Inquiry)',
+    postcode,
+    fullAddress: postcode,
+    customerMessage: message,
+    adminDashboardUrl,
+    headlineTitle: 'NEW CONTACT QUERY RECEIVED',
+    headlineSubtext: 'A customer has submitted a new contact query through the website. Here are the details:',
+    card2Title: 'Request Details',
+  });
+
+  if (mtcHtml) {
+    return mtcHtml;
+  }
+
+  // Resilient fallback to inline template if external file is unavailable
 
   return `
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 20px auto; border: none; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
